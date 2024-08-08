@@ -23,6 +23,7 @@ from swirl_fem.core.interpolation import Nodes1D
 from swirl_fem.core.interpolation import NodeType
 from swirl_fem.core.mesh_refiner import refine_premesh
 from swirl_fem.core.premesh import Premesh
+from swirl_fem.common.premesh_commons import unit_cube_mesh
 
 
 class RefineMeshTest(parameterized.TestCase):
@@ -250,6 +251,70 @@ class RefineMeshTest(parameterized.TestCase):
     self.assertEqual(refined_premesh.num_nodes, 25 * (5 + 4))
     self.assertEqual(refined_premesh.num_elements, 2)
     self.assertEqual(refined_premesh.num_nodes_per_element, 125)
+
+  def test_refine_physical_groups(self):
+    # create a 2d mesh with 2 elements and 6 nodes arranged as follows
+    #   1 -- 3 -- 5
+    #   |    |    |
+    #   0 -- 2 -- 4
+    node_coords = np.array(list(itertools.product([0, 1, 2], [0, 1])),
+                           dtype=np.float32)
+    elements = np.array([[0, 1, 2, 3], [3, 5, 2, 4]], dtype=np.int32)
+    physical_groups = {'boundary': np.array([[0, 1], [4, 5]])}
+
+    premesh = Premesh.create(
+        node_coords=node_coords,
+        elements=elements,
+        physical_groups=physical_groups,
+    )
+    gridpoints = Nodes1D.create(num_points=3,
+                                node_type=NodeType.GAUSS_LOBATTO_LEGENDRE)
+    refined_premesh = refine_premesh(premesh, gridpoints_1d=gridpoints)
+    self.assertEqual(refined_premesh.physical_groups.keys(),
+                     premesh.physical_groups.keys())
+    self.assertEqual(refined_premesh.physical_groups['boundary'].shape,
+                     (2, gridpoints.num_points))
+
+  def test_refine_periodic_links(self):
+    # create a 2d mesh with 2 elements and 6 nodes arranged as follows
+    #   1 -- 3 -- 5
+    #   |    |    |
+    #   0 -- 2 -- 4
+    node_coords = np.array(list(itertools.product([0, 1, 2], [0, 1])),
+                           dtype=np.float32)
+    elements = np.array([[0, 1, 2, 3], [3, 5, 2, 4]], dtype=np.int32)
+    # the boundary facets [0, 1] and [4, 5] have a periodic link.
+    periodic_links = np.array([[[0, 1], [4, 5]]])
+
+    premesh = Premesh.create(
+        node_coords=node_coords,
+        elements=elements,
+        periodic_links=periodic_links,
+    )
+    gridpoints = Nodes1D.create(num_points=3,
+                                node_type=NodeType.GAUSS_LOBATTO_LEGENDRE)
+    refined_premesh = refine_premesh(premesh, gridpoints_1d=gridpoints)
+    self.assertEqual(refined_premesh.periodic_links.shape,
+                     (1, 2, gridpoints.num_points))
+
+  def test_refine_discontinuous(self):
+    # create a 2d mesh with 2 elements and 6 nodes arranged as follows
+    #   1 -- 3 -- 5
+    #   |    |    |
+    #   0 -- 2 -- 4
+    node_coords = np.array(list(itertools.product([0, 1, 2], [0, 1])),
+                           dtype=np.float32)
+    elements = np.array([[0, 1, 2, 3], [3, 5, 2, 4]], dtype=np.int32)
+    premesh = Premesh.create(
+        node_coords=node_coords,
+        elements=elements,
+    )
+    gridpoints = Nodes1D.create(num_points=3,
+                                node_type=NodeType.GAUSS_LEGENDRE)
+    refined_premesh = refine_premesh(premesh, gridpoints_1d=gridpoints)
+    # discontinuous gridpoints makes elements' nodes disjoint from each other
+    self.assertEqual(refined_premesh.num_nodes,
+                     len(elements) * gridpoints.num_points ** 2)
 
 
 if __name__ == '__main__':
