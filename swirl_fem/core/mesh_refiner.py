@@ -53,11 +53,6 @@ def refine_premesh(premesh: Premesh, gridpoints_1d: Nodes1D) -> Premesh:
   """
   if premesh.order != 1:
     raise ValueError(f'Expecting mesh of order 1. Got {premesh.order}.')
-  if premesh.physical_groups:
-    raise NotImplementedError('Refining physical groups is not supported.')
-  if not gridpoints_1d.is_continuous():
-    raise NotImplementedError(
-        f'Discountinuous gridpoints ({gridpoints_1d}) are not supported yet.')
 
   return _MeshRefiner(premesh=premesh, gridpoints_1d=gridpoints_1d).refine()
 
@@ -71,8 +66,6 @@ class _MeshRefiner:
   gridpoints_1d (a `Nodes1D` object), and provides a single function `refine()`
   which creates a refined `Premesh` with the same number of elements and
   nodal distribution specified in `gridpoints_1d`.
-
-  TODO(anudhyan): Support refinement of physical groups.
 
   Attributes:
     premesh: The first order `Premesh` object to refine.
@@ -98,7 +91,10 @@ class _MeshRefiner:
         evalpoints_1d=gridpoints_1d)
     # Intialize the mesh node coords to the primary nodes. Secondary nodes
     # would be added on a call to refine(...).
-    self._node_coords = list(premesh.node_coords)
+    if self.gridpoints_1d.is_continuous():
+      self._node_coords = list(premesh.node_coords)
+    else:
+      self._node_coords = []
 
     # A mapping from used to deduplicate nodes. Maps the source element facets
     # (represented as a sorted sequence of the facet node ids) to a pair:
@@ -144,65 +140,66 @@ class _MeshRefiner:
     target_elements_nd[(slice(None), *slice_nd)] = facets_nd
     return target_elements_nd
 
-  def _refine_elements(self):
-    """Refines elements and populate mapping from facets to secondary nodes."""
-    ndim = self.premesh.ndim
-    num_elements = self.premesh.num_elements
-    # Precompute the node coords of each of the refined elements and reshape the
-    # elements to n-dimensions (from the shape `(num_nodes_per_element,)`). When
-    # new interior nodes are created after deduplication, we slice out the
-    # coordinates from this array.
-    target_node_coords = np.einsum(
-        'mn,end->emd',
-        self.interpolator.interpolation_matrix(),
-        self.premesh.node_coords[self.premesh.elements],
-    )
-    target_node_coords_nd = target_node_coords.reshape((
-        [num_elements] + [self._num_target_points()] * ndim + [ndim]))
-
-    # We add the nodes in all the `num_elements` elements one facet at a time.
-    # In the ith iteration, we add the nodes comprising the ith facet on each
-    # element. The ith entry is numpy array of the ith facet type for all the
-    # elements.
-    elements_nd = self.premesh.elements.reshape([num_elements] + [2] * ndim)
-    target_elems_nd = np.full(
+  def _refine_facets(
+      self,
+      facets: np.ndarray,
+      ndim: int,
+      target_node_coords: np.ndarray | None = None,
+  ) -> np.ndarray:
+    """Refines the given `ndim`-dimensional facets."""
+    # There are 3^ndim subfacets of each facet. In the ith iteration, we refine
+    # the subfacets which are of the ith type in a single batch. If target node
+    # coords is not None, then the new nodes are also added to the global list
+    # of nodes.
+    num_facets = len(facets)
+    facets_nd = facets.reshape([num_facets] + [2] * ndim)
+    target_facets_nd = np.full(
         fill_value=-1,
-        shape=[num_elements] + [self._num_target_points()] * ndim)
+        shape=[num_facets] + [self._num_target_points()] * ndim)
+
+    target_node_coords_nd = None
+    if target_node_coords is not None:
+      target_node_coords_nd = target_node_coords.reshape((
+          [num_facets] + [self._num_target_points()] * ndim + [ndim]))
 
     # Iterate through all 3^n facets of the elements.
-    for facet_type in facet_util.get_facet_types(ndim=self.premesh.ndim):
+    for facet_type in facet_util.get_facet_types(ndim):
       source_slice_nd = facet_util.slice_from_facet_type(
           facet_type, interior_nodes_only=False)
       target_slice_nd = facet_util.slice_from_facet_type(
           facet_type, interior_nodes_only=True)
-      element_facets = elements_nd[(slice(None), *source_slice_nd)]
+      curr_facets = facets_nd[(slice(None), *source_slice_nd)]
 
       # If we're at a 0D facet (a primary node), just add the node unchanged.
       facet_dim = facet_type.count(FacetDimType.INNER)
       if facet_dim == 0:
-        target_elems_nd = self._add_facets(
-            facet_type, element_facets, target_elems_nd)
+        target_facets_nd = self._add_facets(
+            facet_type, curr_facets, target_facets_nd)
         continue
 
       # Slice out the coordinates of the facet nodes from the precomputed
       # array of node coordinates.
-      facet_node_coords = (
-          target_node_coords_nd[(slice(None), *target_slice_nd, slice(None))])
+      if target_node_coords_nd is not None:
+        facet_node_coords = (
+            target_node_coords_nd[(slice(None), *target_slice_nd, slice(None))])
+      else:
+        facet_node_coords = None
 
       # For full ndims there's no need for deduplication.
-      if facet_dim == self.premesh.ndim:
+      if facet_dim == self.premesh.ndim and facet_node_coords is not None:
         target_nodes = self._add_nodes(
             list(facet_node_coords.reshape((-1, ndim))))
-        target_elems_nd = self._add_facets(
-            facet_type, np.array(target_nodes, dtype=np.int32), target_elems_nd)
+        target_facets_nd = self._add_facets(
+            facet_type, np.array(target_nodes, dtype=np.int32),
+            target_facets_nd)
         continue
 
       # For 1 < facet_dim < mesh.ndim, we need to check for duplicates.
       target_facets = []
       facet_perms = []
-      for idx, elem_facet in enumerate(element_facets):
-        elem_facet = elem_facet.reshape(-1).tolist()
-        node_key = tuple(sorted(elem_facet))
+      for idx, facet in enumerate(curr_facets):
+        facet = facet.reshape(-1).tolist()
+        node_key = tuple(sorted(facet))
 
         facet_value = self._inner_facets_mapping.get(node_key, None)
         if facet_value is None:  # New facet.
@@ -211,11 +208,11 @@ class _MeshRefiner:
           target_facets.append(target_nodes)
           facet_perms.append(list(range(len(target_nodes))))
           self._inner_facets_mapping[node_key] = (
-              (tuple(elem_facet), target_nodes))
+              (tuple(facet), target_nodes))
         else:  # Existing facet.
           facet_orientation, target_nodes = facet_value
           orientation_key = tuple(
-              elem_facet.index(k) for k in facet_orientation)
+              facet.index(k) for k in facet_orientation)
           facet_perms.append(
               self._dim_to_orderings_mapping[facet_dim][orientation_key])
           target_facets.append(target_nodes)
@@ -225,18 +222,66 @@ class _MeshRefiner:
           np.array(facet_perms, dtype=np.int32),
           axis=-1,
       )
-      target_elems_nd = self._add_facets(
-          facet_type, target_facets, target_elems_nd)
+      target_facets_nd = self._add_facets(
+          facet_type, target_facets, target_facets_nd)
 
-    return target_elems_nd.reshape((num_elements,
-                                    self._num_target_points() ** ndim))
+    return target_facets_nd.reshape(
+        (num_facets, self._num_target_points() ** ndim))
+
+  def _refine_elements(self):
+    """Refines elements and populate mapping from facets to secondary nodes."""
+    target_node_coords = np.einsum(
+        'mn,end->emd',
+        self.interpolator.interpolation_matrix(),
+        self.premesh.node_coords[self.premesh.elements],
+    )
+
+    # If discontinous, just add all the target nodes as is and we're done!
+    ndim = self.premesh.ndim
+    if not self.gridpoints_1d.is_continuous():
+      target_elems = self._add_nodes(target_node_coords.reshape((-1, ndim)))
+      return np.array(target_elems, dtype=np.int32).reshape(
+          (self.premesh.num_elements, self._num_target_points() ** ndim))
+
+    # Otherwise, refine elements with deduplication for the element boundaries.
+    return self._refine_facets(
+        facets=self.premesh.elements,
+        ndim=ndim,
+        target_node_coords=target_node_coords,
+    )
 
   def refine(self) -> Premesh:
     """Return the refined mesh."""
     elements = self._refine_elements()
     node_coords = np.stack(self._node_coords)
+
+    # By this time, all facets would have been added to `inner_facets_mapping`.
+    # We use those to refine physical groups and periodic links.
+    physical_groups = {}
+
+    refine_facets_fn = lambda f: self._refine_facets(
+        f, ndim=self.premesh.ndim - 1)
+    if self.premesh.physical_groups and self.gridpoints_1d.is_continuous():
+      for physical_name, facets in self.premesh.physical_groups.items():
+        if not facets.size:
+          raise ValueError(f'Got an empty physical group "{physical_name}".')
+        physical_groups[physical_name] = refine_facets_fn(facets)
+
+    # Refine facets which form periodic links.
+    periodic_links = None
+    if (
+        self.premesh.periodic_links is not None
+        and self.gridpoints_1d.is_continuous()
+    ):
+      periodic_links = np.stack([
+          refine_facets_fn(self.premesh.periodic_links[:, 0, :]),
+          refine_facets_fn(self.premesh.periodic_links[:, 1, :]),
+      ], axis=-2)
+
     return Premesh.create(
         node_coords=node_coords,
         elements=np.array(elements, dtype=np.int32),
         gridpoints_1d=self.gridpoints_1d,
+        physical_groups=physical_groups,
+        periodic_links=periodic_links,
         partitions=self.premesh.partitions)
