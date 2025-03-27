@@ -294,7 +294,7 @@ def compute_mse_loss(batch, params, model_apply_fn: Callable[..., Any],
   aux = carry[-1]
   kl_path = aux['kl_path']
   kl_q0 = aux['kl_q0']
-  logging.info('aux: %s', jax.tree_map(jnp.shape, aux))
+  logging.info('aux: %s', jax.tree_map(jnp.shape, aux))  # pytype: disable=module-attr
   preds = jnp.moveaxis(preds, source=0, destination=1)
   logging.info('preds.shape: %s', preds.shape)
 
@@ -345,7 +345,7 @@ def compute_mse_loss(batch, params, model_apply_fn: Callable[..., Any],
       'z1_stds': jnp.abs(aux['z1_stds']).mean(axis=0),
       'tke_err': tke_error.mean(axis=0),
   }
-  logging.info('aux: %s', jax.tree_map(jnp.shape, aux))
+  logging.info('aux: %s', jax.tree_map(jnp.shape, aux))  # pytype: disable=module-attr
   return loss, aux
 
 
@@ -370,7 +370,7 @@ def compute_metrics(loss, aux, train: bool):
     metrics['mse@64'] = aux['mse'][64 - 1]
     metrics['mse@128'] = aux['mse'][128 - 1]
 
-  logging.info('metrics: %s', jax.tree_map(jnp.shape, metrics))
+  logging.info('metrics: %s', jax.tree_map(jnp.shape, metrics))  # pytype: disable=module-attr
   metrics = lax.pmean(metrics, axis_name='batch')
   return metrics
 

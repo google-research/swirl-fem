@@ -85,7 +85,7 @@ def _read_and_parse(
       windows.append(arr[i:i + window_size:window_step])
     return np.stack(windows)
 
-  return jax.tree_map(_windowed, snapshots)
+  return jax.tree_map(_windowed, snapshots)  # pytype: disable=module-attr
 
 
 def create_split(
