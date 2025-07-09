@@ -1,4 +1,4 @@
-# Copyright 2024 The swirl_fem Authors.
+# Copyright 2025 The swirl_fem Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,7 +16,7 @@
 
 import os
 
-import jax
+import jax.extend
 
 
 def set_host_platform_device_count(num_devices: int) -> None:
@@ -30,4 +30,4 @@ def set_host_platform_device_count(num_devices: int) -> None:
         flags_str + f' --xla_force_host_platform_device_count={num_devices}'
     )
   # Clear any cached backends so new CPU backend will pick up the env var.
-  jax.lib.xla_bridge.get_backend.cache_clear()
+  jax.extend.backend.get_backend.cache_clear()

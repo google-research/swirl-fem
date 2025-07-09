@@ -1,4 +1,4 @@
-# Copyright 2024 The swirl_fem Authors.
+# Copyright 2025 The swirl_fem Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ import os
 
 from absl.testing import absltest
 import jax
+import jax.extend
 import jax.numpy as jnp
 import numpy as np
 from swirl_fem.core import gather_scatter
@@ -34,13 +35,13 @@ def set_host_platform_device_count(num_devices: int):
         flags_str + f' --xla_force_host_platform_device_count={num_devices}'
     )
   # Clear any cached backends so new CPU backend will pick up the env var.
-  jax.lib.xla_bridge.get_backend.cache_clear()
+  jax.extend.backend.get_backend.cache_clear()
   def undo():
     if prev_xla_flags is None:
       del os.environ['XLA_FLAGS']
     else:
       os.environ['XLA_FLAGS'] = prev_xla_flags
-    jax.lib.xla_bridge.get_backend.cache_clear()
+    jax.extend.backend.get_backend.cache_clear()
   return undo
 
 
