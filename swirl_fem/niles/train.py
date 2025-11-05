@@ -62,7 +62,7 @@ def transfer_perm(source_mesh, target_mesh):
 def get_tke(u, sem, uniform_mesh, first_order_perm, config):
   """Computes the turbulent kinetic energy (TKE) of a velocity field."""
   n = int(math.sqrt(config.num_nodes))
-  u_flat = jax.vmap(partial(uniform_mesh.interpolate,
+  u_flat = jax.vmap(partial(uniform_mesh.interpolate,  # pytype: disable=attribute-error
                             source_mesh=sem.velocity.mesh),
                     in_axes=-1, out_axes=-1)(u)
   u_flat = u_flat[first_order_perm]
