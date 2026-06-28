@@ -1,4 +1,4 @@
-# Copyright 2025 The swirl_fem Authors.
+# Copyright 2026 The swirl_fem Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@
 import dataclasses
 import operator
 from typing import Any, Callable
+from typing import TYPE_CHECKING
 
 from jax import lax
 import jax.numpy as jnp
@@ -58,6 +59,13 @@ class SemiTracedScalar:
   # signal to pytype that additional methods (the overloaded arithmetic and
   # comparison operators) are added below the class definition
   _HAS_DYNAMIC_ATTRIBUTES = True
+  if TYPE_CHECKING:
+
+    def __getattr__(self, name: str) -> Any:
+      ...
+
+    def __setattr__(self, name: str, value: Any) -> None:
+      ...
 
   @staticmethod
   def where(c, x, y):
