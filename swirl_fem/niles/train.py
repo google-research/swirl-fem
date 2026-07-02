@@ -560,7 +560,7 @@ def train_and_evaluate(config: ml_collections.FrozenConfigDict,
 
   steps_per_epoch = (
       input_pipeline.get_num_examples(
-          tfds.Split.TRAIN, window_size=config.train_window_size,
+          tfds.Split.TRAIN, window_size=config.train_window_size,  # pyrefly: ignore[missing-attribute]
           window_stride=config.train_window_stride, debug=config.debug
       )
       // config.batch_size
@@ -572,7 +572,7 @@ def train_and_evaluate(config: ml_collections.FrozenConfigDict,
 
   if config.steps_per_eval == -1:
     num_validation_examples = (
-        input_pipeline.NUM_SPLIT_EXAMPLES[tfds.Split.VALIDATION]
+        input_pipeline.NUM_SPLIT_EXAMPLES[tfds.Split.VALIDATION]  # pyrefly: ignore[missing-attribute]
         // config.batch_size
     )
     steps_per_eval = num_validation_examples // config.batch_size

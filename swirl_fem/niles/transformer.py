@@ -86,7 +86,7 @@ class MlpBlock(nn.Module):
         kernel_init=self.kernel_init,
         bias_init=self.bias_init,
         precision=self.precision)(inputs)
-    x = self.activation_fn(x)
+    x = self.activation_fn(x)  # pyrefly: ignore[bad-argument-type]
     output = nn.Dense(
         actual_out_dim,
         dtype=self.dtype,
@@ -358,10 +358,10 @@ class MultiscaleEncoder(nn.Module):
       x = EncoderBlock(
           num_heads=num_heads,
           out_dim=out_dim,
-          pooling_kernel_q=pool_q,
+          pooling_kernel_q=pool_q,  # pyrefly: ignore[bad-argument-type]
           pooling_kernel_kv=self.pooling_kernel,
-          pooling_stride_q=stride_q,
-          pooling_stride_kv=stride_kv,
+          pooling_stride_q=stride_q,  # pyrefly: ignore[bad-argument-type]
+          pooling_stride_kv=stride_kv,  # pyrefly: ignore[bad-argument-type]
           name=f'block_{layer_idx}',
           use_bias=self.use_bias,
           dtype=self.dtype,
@@ -406,7 +406,7 @@ class MultiscaleDecoder(nn.Module):
       x = DecoderBlock(
           num_heads=num_heads,
           out_dim=out_dim,
-          qkv_tile_reps=tile_reps,
+          qkv_tile_reps=tile_reps,  # pyrefly: ignore[bad-argument-type]
           name=f'decoder_block_{layer_idx}',
           use_bias=self.use_bias,
           dtype=self.dtype,
@@ -968,8 +968,8 @@ class LatentSDE(nn.Module):
       # kl_q0 = jnp.zeros((batch_size,), dtype=jnp.float32)
       # kl_path = jnp.zeros((batch_size,), dtype=jnp.float32)
       aux = {
-          'kl_q0': kl_q0,
-          'kl_path': kl_path.mean(axis=-1),
+          'kl_q0': kl_q0,  # pyrefly: ignore[unbound-name]
+          'kl_path': kl_path.mean(axis=-1),  # pyrefly: ignore[unbound-name]
           'z0_means': z0_means,
           'z1_means': z1_means,
           # 'z1_stds': z1_stds,

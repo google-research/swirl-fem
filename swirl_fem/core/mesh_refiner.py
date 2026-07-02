@@ -204,7 +204,7 @@ class _MeshRefiner:
         facet_value = self._inner_facets_mapping.get(node_key, None)
         if facet_value is None:  # New facet.
           target_nodes = self._add_nodes(
-              list(facet_node_coords[idx].reshape((-1, ndim))))
+              list(facet_node_coords[idx].reshape((-1, ndim))))  # pyrefly: ignore[unsupported-operation]
           target_facets.append(target_nodes)
           facet_perms.append(list(range(len(target_nodes))))
           self._inner_facets_mapping[node_key] = (

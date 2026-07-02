@@ -426,7 +426,7 @@ def get_local_elements(elements: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
     local_elements: The renumbered elements with the same shape as `elements`.
   """
   # First, we find the set of node indices occurring in each partition.
-  elements = list(elements)
+  elements = list(elements)  # pyrefly: ignore[bad-assignment]
   elements_flat = jax.tree.map(lambda x: x.flatten(), elements)
   dedup_fn = lambda indices: np.unique(indices[indices != SENTINEL])
   node_indices = _pad_evenly(jax.tree.map(dedup_fn, elements_flat))

@@ -58,7 +58,7 @@ def _get_periodic_links(mesh: meshio.Mesh, ndim: int) -> np.ndarray:
   # Create the mapping from source nodes to target nodes for every periodic
   # connection in the mesh among entities of dimension `ndim - 1`.
   src_tgt_mapping = dict()
-  for entity_dim, _, _, node_pairs in mesh.gmsh_periodic:
+  for entity_dim, _, _, node_pairs in mesh.gmsh_periodic:  # pyrefly: ignore[not-iterable]
     if entity_dim != ndim - 1:
       continue
     src_tgt_mapping.update(dict(node_pairs.tolist()))

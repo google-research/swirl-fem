@@ -87,9 +87,9 @@ def get_facet_types(
   """
   facets = list(itertools.product(list(FacetDimType), repeat=ndim))
   if facet_ndim is None:
-    return facets
+    return facets  # pyrefly: ignore[bad-return]
 
-  return [f for f in facets if f.count(FacetDimType.INNER) == facet_ndim]
+  return [f for f in facets if f.count(FacetDimType.INNER) == facet_ndim]  # pyrefly: ignore[bad-return]
 
 
 def get_orderings_mapping(ndim: int, num_points_1d: int):

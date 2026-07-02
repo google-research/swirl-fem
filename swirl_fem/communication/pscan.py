@@ -205,10 +205,10 @@ def _fanin_fanout_flat(
                    lambda: red)
 
   if prefix_scan and reduction:
-    data = (scan, red)
+    data = (scan, red)  # pyrefly: ignore[unbound-name]
     merge = lambda x, y: (list_op(y[0], x[0]), y[1])
   elif prefix_scan:
-    data = scan
+    data = scan  # pyrefly: ignore[unbound-name]
     merge = lambda x, y: list_op(y, x)  # pylint: disable=arguments-out-of-order
   else:
     data = red

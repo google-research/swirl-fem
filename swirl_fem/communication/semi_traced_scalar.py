@@ -64,7 +64,7 @@ class SemiTracedScalar:
     def __getattr__(self, name: str) -> Any:
       ...
 
-    def __setattr__(self, name: str, value: Any) -> None:
+    def __setattr__(self, name: str, value: Any) -> None:  # pyrefly: ignore[bad-class-definition]
       ...
 
   @staticmethod

@@ -74,7 +74,7 @@ def core_sdeint(
       return out, repack_fn(scope)
     else:
       y_integrated = sdeint(
-          deriv_fn, x, ts, dw, variable_groups, rng_groups, *additional_args)
+          deriv_fn, x, ts, dw, variable_groups, rng_groups, *additional_args)  # pyrefly: ignore[bad-argument-type]
       return y_integrated, repack_fn(scope)
 
   return pack(inner, (variables,), (variables,), (rngs,), name='sdeint')

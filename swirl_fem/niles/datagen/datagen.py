@@ -149,7 +149,7 @@ def one_cycle(sem: navier_stokes.StokesSEM,
 
   # Write to file
   for key in ['u', 'p', 't']:
-    dataset[key] = np.stack(dataset[key])
+    dataset[key] = np.stack(dataset[key])  # pyrefly: ignore[unsupported-operation]
 
   file_path = os.path.join(FLAGS.workdir, (
       f'kolmogorov_flow_grid_{RESOLUTION}_order_{ORDER}'

@@ -50,4 +50,4 @@ def partition(premesh: Premesh, num_partitions: int) -> Premesh:
   # Partition the graph into `num_partitions` parts
   _, partitions = pymetis.part_graph(num_partitions, adjacency=adjlist)
 
-  return premesh.replace(partitions=partitions)
+  return premesh.replace(partitions=partitions)  # pyrefly: ignore[missing-attribute]

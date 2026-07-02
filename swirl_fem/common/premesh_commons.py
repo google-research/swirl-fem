@@ -54,7 +54,7 @@ def _unit_cube_facet_elements(
     return np.ravel_multi_index(multi_idx, [num_elements_per_dim + 1] * ndim)
 
   elements = []
-  for element_tuple in itertools.product(*map(dim_to_elem.get, facet)):
+  for element_tuple in itertools.product(*map(dim_to_elem.get, facet)):  # pyrefly: ignore[no-matching-overload]
     # From each element N-tuple, create the N-D element containing 2^N nodes.
     # E.g. in 2D, the element tuple ((0, 1), (5, 6)) becomes a single element
     # containing 4 nodes: [(0, 5), (0, 6), (1, 5), (1, 6)].

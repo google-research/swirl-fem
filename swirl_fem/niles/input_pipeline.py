@@ -28,8 +28,8 @@ import tensorflow_datasets as tfds
 
 
 NUM_SPLIT_EXAMPLES = dict([
-    (tfds.Split.TRAIN, 6400 * 24),
-    (tfds.Split.VALIDATION, 6400 * 4),
+    (tfds.Split.TRAIN, 6400 * 24),  # pyrefly: ignore[missing-attribute]
+    (tfds.Split.VALIDATION, 6400 * 4),  # pyrefly: ignore[missing-attribute]
 ])
 
 _DATASET_DIR = flags.DEFINE_string(
@@ -50,7 +50,7 @@ def get_num_examples(
   """Returns the total number of examples."""
   num_examples = NUM_SPLIT_EXAMPLES[split_name]
   if debug:
-    if split_name == tfds.Split.TRAIN:
+    if split_name == tfds.Split.TRAIN:  # pyrefly: ignore[missing-attribute]
       num_examples //= 24
     else:
       num_examples //= 4
@@ -104,12 +104,12 @@ def create_split(
   logging.info('input pipeline creating split. debug: %s', str(config.debug))
 
   if train:
-    split_name = tfds.Split.TRAIN
+    split_name = tfds.Split.TRAIN  # pyrefly: ignore[missing-attribute]
     shards = _TRAIN_SHARDS
     window_size = config.train_window_size
     window_stride = config.train_window_stride
   else:
-    split_name = tfds.Split.VALIDATION
+    split_name = tfds.Split.VALIDATION  # pyrefly: ignore[missing-attribute]
     shards = _VALID_SHARDS
     window_size = config.eval_window_size
     window_stride = config.eval_window_stride
@@ -142,7 +142,7 @@ def create_split(
   for key, value in snapshots.items():
     split_snapshots[key] = value[split_start:split_start + split_size]
 
-  ds = tf.data.Dataset.from_tensor_slices(split_snapshots)
+  ds = tf.data.Dataset.from_tensor_slices(split_snapshots)  # pyrefly: ignore[bad-argument-type]
   options = tf.data.Options()
   options.experimental_threading.private_threadpool_size = 48
   ds = ds.with_options(options)

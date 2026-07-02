@@ -133,7 +133,7 @@ class StokesPressure:
 
     u = self.pspace.scalar_function(self.gather(p))
     v = self.pspace.scalar_function(None)
-    return self.scatter(self.pspace.local_covector(l, (u, v)))
+    return self.scatter(self.pspace.local_covector(l, (u, v)))  # pyrefly: ignore[bad-argument-type]
 
   def exchange(self, p: jax.Array) -> jax.Array:
     """Apply QQᵀ."""
@@ -224,7 +224,7 @@ class StokesVelocity:
 
     u = self.vspace.vector_function(u_local)
     v = self.vspace.vector_function(None)
-    return self.vspace.local_covector(a, (u, v))
+    return self.vspace.local_covector(a, (u, v))  # pyrefly: ignore[bad-argument-type]
 
   def B_local(self, u_local: jax.Array) -> jax.Array:
     """Apply the velocity mass operator locally."""
@@ -233,7 +233,7 @@ class StokesVelocity:
 
     u = self.vspace.vector_function(u_local)
     v = self.vspace.vector_function(None)
-    return self.vspace.local_covector(l, (u, v))
+    return self.vspace.local_covector(l, (u, v))  # pyrefly: ignore[bad-argument-type]
 
   def C_local(self, u_local: jax.Array) -> jax.Array:
     """Apply the local convection operator."""
@@ -242,7 +242,7 @@ class StokesVelocity:
 
     u = self.overint_space.vector_function(u_local)
     v = self.overint_space.vector_function(None)
-    return self.overint_space.local_covector(c, (u, u, v))
+    return self.overint_space.local_covector(c, (u, u, v))  # pyrefly: ignore[bad-argument-type]
 
 
 @flax.struct.dataclass
@@ -317,7 +317,7 @@ class StokesSEM:
 
     v = self.velocity.vspace.vector_function(u_local)
     p = self.pressure.pspace.scalar_function(None)
-    return self.pressure.pspace.local_covector(b, (v, p))
+    return self.pressure.pspace.local_covector(b, (v, p))  # pyrefly: ignore[bad-argument-type]
 
   def Dt_local(self, p_local: jax.Array) -> jax.Array:
     """Apply the local operator Dᵀ."""
@@ -326,7 +326,7 @@ class StokesSEM:
 
     v = self.velocity.vspace.vector_function(None)
     p = self.pressure.pspace.scalar_function(p_local)
-    return self.velocity.vspace.local_covector(b, (v, p))
+    return self.velocity.vspace.local_covector(b, (v, p))  # pyrefly: ignore[bad-argument-type]
 
   def D(self, u: jax.Array) -> jax.Array:
     """Velocity divergence matrix."""
@@ -423,13 +423,13 @@ class StokesSEM:
     ext_coeffs = extk_coeffs(k=1)
     p_ext = sum(
         ext_coeffs[-i] * ps[-i] for i in range(1, len(ext_coeffs) + 1))
-    f = f + self.Dt(p_ext)
+    f = f + self.Dt(p_ext)  # pyrefly: ignore[bad-argument-type]
 
     # Solve for H(u*) = b.
     beta_hist = bdfk_coeffs(time_order)[:-1]
     beta_k = bdfk_coeffs(time_order)[-1]
     H_ = lambda u: (beta_k / dt) * self.B(u) + mu * self.A(u)
-    f = f - self.B((1 / dt) * sum(coef * u for coef, u in zip(beta_hist, us)))
+    f = f - self.B((1 / dt) * sum(coef * u for coef, u in zip(beta_hist, us)))  # pyrefly: ignore[bad-argument-type]
     if u_boundary is not None:
       f = f - H_(u_boundary)
 

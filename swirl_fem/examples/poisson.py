@@ -141,7 +141,7 @@ def solve_poisson(
   def A(u):
     u = fespace.scalar_function(mesh.gather(u))
     v = fespace.scalar_function(None)
-    Au_local = fespace.local_covector(a, (u, v))
+    Au_local = fespace.local_covector(a, (u, v))  # pyrefly: ignore[bad-argument-type]
     Au = mesh.scatter(Au_local)
     return with_bc(Au)
 
@@ -149,7 +149,7 @@ def solve_poisson(
   def B(u):
     u = fespace.scalar_function(mesh.gather(u))
     v = fespace.scalar_function(None)
-    Bu_local = fespace.local_covector(l, (u, v))
+    Bu_local = fespace.local_covector(l, (u, v))  # pyrefly: ignore[bad-argument-type]
     Bu = mesh.scatter(Bu_local)
     return with_bc(Bu)
 

@@ -118,17 +118,17 @@ class Mesh:
           f'{num_nodes_per_element} != {gridpoints_1d.num_points} ** {ndim}.')
 
     if node_indices is None:
-      node_indices = jnp.arange(len(node_coords), dtype=jnp.int32)
+      node_indices = jnp.arange(len(node_coords), dtype=jnp.int32)  # pyrefly: ignore[bad-argument-type]
 
     return cls(
-        node_coords=node_coords,
-        elements=elements,
+        node_coords=node_coords,  # pyrefly: ignore[bad-argument-type]
+        elements=elements,  # pyrefly: ignore[bad-argument-type]
         order=gridpoints_1d.num_points - 1,
         gridpoints_1d=gridpoints_1d,
-        physical_masks=physical_masks,
-        node_indices=node_indices,
-        exchange_gather_indices=exchange_gather_indices,
-        exchange_unique_indices=exchange_unique_indices,
+        physical_masks=physical_masks,  # pyrefly: ignore[bad-argument-type]
+        node_indices=node_indices,  # pyrefly: ignore[bad-argument-type]
+        exchange_gather_indices=exchange_gather_indices,  # pyrefly: ignore[bad-argument-type]
+        exchange_unique_indices=exchange_unique_indices,  # pyrefly: ignore[bad-argument-type]
         axis_name=axis_name,
     )
 

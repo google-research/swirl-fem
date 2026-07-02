@@ -101,7 +101,7 @@ def crystal_router_setup(mesh: Mesh, axis_name):
     """
     data_flat, tree_def = jax.tree_util.tree_flatten(data)
     unflatten = lambda l: jax.tree_util.tree_unflatten(tree_def, l)
-    out = crystal_flat(CrystalData([target] + data_flat, n), return_source)
+    out = crystal_flat(CrystalData([target] + data_flat, n), return_source)  # pyrefly: ignore[bad-argument-type]
     if return_source:
       return out.n, unflatten(out.data[1:-1]), out.data[-1]
     else:
@@ -421,7 +421,7 @@ def _crystal_router_stage(
   send = crystal_data.select(send_mask, size=data_size)
 
   send = lax.pshuffle(send, axis_name=axis_name, perm=perms[0])
-  keep = lax.cond(num_recv.local > 0, lambda: keep + send, lambda: keep)
+  keep = lax.cond(num_recv.local > 0, lambda: keep + send, lambda: keep)  # pyrefly: ignore[unsupported-operation]
 
   if np.max(num_recv.global_) > 1:
     send = lax.pshuffle(send, axis_name=axis_name, perm=perms[1])
