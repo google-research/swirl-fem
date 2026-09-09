@@ -93,7 +93,7 @@ def sdeint(
     y_next = _sdeint_wrapper(f, False, y_curr, (t_curr, t_next), dw, *args)
     return (y_next, t_next), y_next
 
-  _, ys = lax.scan(scan_fun, (y0, t0), (segmented_dw, touts))
+  _, ys = lax.scan(scan_fun, (y0, t0), (segmented_dw, touts))  # pyrefly: ignore[bad-argument-type]
   return ys
 
 

@@ -176,7 +176,7 @@ class ScalarNodalQFunction(NodalQFunction):
     super().__init__(fespace, value_shape=(), u_local=u_local)
 
   def _evaluate(self):
-    return vmap(self.fespace.interpolator.interpolate)(self.u_local)
+    return vmap(self.fespace.interpolator.interpolate)(self.u_local)  # pyrefly: ignore[bad-argument-type]
 
 
 @dataclasses.dataclass
@@ -206,7 +206,7 @@ class VectorNodalQFunction(NodalQFunction):
 
   def _evaluate(self):
     return vmap(vmap(self.fespace.interpolator.interpolate),
-                in_axes=-1, out_axes=-1)(self.u_local)
+                in_axes=-1, out_axes=-1)(self.u_local)  # pyrefly: ignore[bad-argument-type]
 
 
 @dataclasses.dataclass
