@@ -26,16 +26,16 @@ from swirl_fem.communication.semi_traced_scalar import SemiTracedScalar
 
 
 def _dtype_range(dtype: jnp.dtype):
-  """Returns tuple giving the minimum and maximum values of ``dtype``."""
+  """Returns lower/upper bounds, including infinities for floating dtypes."""
   if dtype == jnp.dtype(bool):
     return (False, True)
 
   if issubclass(dtype.type, numbers.Integral):
     info = jnp.iinfo(dtype)
-  else:
-    info = jnp.finfo(dtype)
+    return (info.min, info.max)
 
-  return (info.min, info.max)
+  # Finite limits are not neutral elements when floating inputs contain infinity.
+  return (-jnp.inf, jnp.inf)
 
 
 # Mapping to monoid unit (given dtype) of supported ops
