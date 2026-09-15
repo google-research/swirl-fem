@@ -73,7 +73,7 @@ class MlpBlock(nn.Module):
   bias_init = nn.initializers.normal(stddev=1e-6)
   activation_fn = nn.gelu
   precision: jax.lax.Precision | None = None
-  dtype: jnp.dtype = jnp.float32
+  dtype: jnp.dtype = jnp.float32  # pyrefly: ignore[bad-assignment]
 
   @nn.compact
   def __call__(self, inputs: jnp.ndarray):
@@ -106,7 +106,7 @@ class MultiScaleAttentionDownSample(nn.Module):
   pool_mode: str
   use_residual_q_pooling: bool = True
   use_bias: bool = False
-  dtype: jnp.dtype = jnp.float32
+  dtype: jnp.dtype = jnp.float32  # pyrefly: ignore[bad-assignment]
   precision: lax.Precision | None = None
 
   @nn.compact
@@ -151,7 +151,7 @@ class MultiScaleAttentionUpsample(nn.Module):
   qkv_tile_reps: tuple[int, ...]
   use_residual_q_pooling: bool = True
   use_bias: bool = False
-  dtype: jnp.dtype = jnp.float32
+  dtype: jnp.dtype = jnp.float32  # pyrefly: ignore[bad-assignment]
   precision: lax.Precision | None = None
 
   @nn.compact
@@ -212,7 +212,7 @@ class EncoderBlock(nn.Module):
   pooling_stride_q: tuple[int, ...]
   pooling_stride_kv: tuple[int, ...]
   use_bias: bool = False
-  dtype: jnp.dtype = jnp.float32
+  dtype: jnp.dtype = jnp.float32  # pyrefly: ignore[bad-assignment]
   precision: lax.Precision | None = None
 
   @nn.compact
@@ -276,7 +276,7 @@ class DecoderBlock(nn.Module):
   num_heads: int
   qkv_tile_reps: tuple[int, ...]
   use_bias: bool = False
-  dtype: jnp.dtype = jnp.float32
+  dtype: jnp.dtype = jnp.float32  # pyrefly: ignore[bad-assignment]
   precision: lax.Precision | None = None
 
   @nn.compact
@@ -327,7 +327,7 @@ class MultiscaleEncoder(nn.Module):
   num_initial_heads: int = 1
   use_bias: bool = False
   pool_q_every_layer: bool = True
-  dtype: jnp.dtype = jnp.float32
+  dtype: jnp.dtype = jnp.float32  # pyrefly: ignore[bad-assignment]
   precision: lax.Precision | None = None
 
   @nn.compact
@@ -383,7 +383,7 @@ class MultiscaleDecoder(nn.Module):
   num_initial_heads: int
   use_bias: bool = False
   use_residuals: bool = True
-  dtype: jnp.dtype = jnp.float32
+  dtype: jnp.dtype = jnp.float32  # pyrefly: ignore[bad-assignment]
   precision: lax.Precision | None = None
 
   @nn.compact
@@ -467,7 +467,7 @@ class Model(nn.Module):
   use_residuals: bool = True
   use_bias: bool = False
   pool_q_every_layer: bool = True
-  dtype: jnp.dtype = jnp.float32
+  dtype: jnp.dtype = jnp.float32  # pyrefly: ignore[bad-assignment]
   precision: lax.Precision | None = None
   freeze_encoder: bool = False
   mean_after_decoder: bool = False
