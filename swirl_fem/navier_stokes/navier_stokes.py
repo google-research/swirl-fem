@@ -486,7 +486,7 @@ class StokesSEM:
     u = self.velocity.vspace.vector_function(self.velocity.gather(u))
 
     def _vorticity(x: jax.Array):
-      grad_ux = grad(u)(x)
+      grad_ux = grad(u)(x)  # pyrefly: ignore[bad-argument-type]
       return grad_ux[1, 0] - grad_ux[0, 1]
 
     vort_local = self.velocity.vspace._evaluate(_vorticity)  # pylint: disable=protected-access
