@@ -17,6 +17,7 @@
 from functools import partial  # pylint: disable=g-importing-member
 
 from absl.testing import absltest
+from absl.testing import parameterized
 import jax
 from jax import sharding
 from jax.experimental import mesh_utils
@@ -50,7 +51,7 @@ def jit_pscan(mesh_shape, axis_names, partition_spec):
   return do_scan, do_reduce
 
 
-class PscanTest(absltest.TestCase):
+class PscanTest(parameterized.TestCase):
 
   @classmethod
   def setUpClass(cls):
@@ -91,6 +92,29 @@ class PscanTest(absltest.TestCase):
 
         allreduce2 = do_preduce(x, jnp_op, axis_name='i')
         np.testing.assert_array_equal(allreduce2, np_op.reduce(x))
+
+  @parameterized.product(
+      op_name=['minimum', 'maximum'],
+      dtype=[jnp.float32, jnp.float64],
+      reduction=[False, True],
+  )
+  def test_floating_extrema_with_infinities(self, op_name, dtype, reduction):
+    do_scan, _ = jit_pscan(
+        mesh_shape=(NDEVICES,), axis_names='i',
+        partition_spec=sharding.PartitionSpec('i'))
+    identity = np.inf if op_name == 'minimum' else -np.inf
+    x = jnp.asarray([identity, identity, 3., -5., 2., identity,
+                     7., -2., 0., 4., -1., identity], dtype=dtype)
+    result = do_scan(
+        x, getattr(jnp, op_name), axis_name='i', reduction=reduction)
+    if reduction:
+      result, reduced = result
+      np.testing.assert_array_equal(reduced, getattr(np, op_name).reduce(x))
+    expected = getattr(np, op_name).accumulate(
+        np.concatenate([np.asarray([identity], dtype=np.asarray(x).dtype),
+                        np.asarray(x)[:-1]]))
+    self.assertEqual(result.dtype, x.dtype)
+    np.testing.assert_array_equal(result, expected)
 
   def test_2d_mesh(self):
     assert jax.device_count() == NDEVICES
