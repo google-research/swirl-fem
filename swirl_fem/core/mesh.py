@@ -100,8 +100,8 @@ class Mesh:
       axis_name: str | None = None,
   ) -> 'Mesh':
     """Creates a `Mesh` object."""
-    ndim = node_coords.shape[-1]  # pytype: disable=attribute-error  # numpy-scalars
-    num_nodes_per_element = elements.shape[-1]  # pytype: disable=attribute-error  # numpy-scalars
+    ndim = node_coords.shape[-1]  # pyrefly: ignore[missing-attribute]
+    num_nodes_per_element = elements.shape[-1]  # pyrefly: ignore[missing-attribute]
     physical_masks = physical_masks or {}
 
     # Default to uniformly distributed (aka Newton-Cotes) nodes if

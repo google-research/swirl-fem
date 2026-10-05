@@ -62,7 +62,7 @@ def transfer_perm(source_mesh, target_mesh):
 def get_tke(u, sem, uniform_mesh, first_order_perm, config):
   """Computes the turbulent kinetic energy (TKE) of a velocity field."""
   n = int(math.sqrt(config.num_nodes))
-  u_flat = jax.vmap(partial(uniform_mesh.interpolate,  # pytype: disable=attribute-error
+  u_flat = jax.vmap(partial(uniform_mesh.interpolate,
                             source_mesh=sem.velocity.mesh),
                     in_axes=-1, out_axes=-1)(u)
   u_flat = u_flat[first_order_perm]
@@ -294,7 +294,7 @@ def compute_mse_loss(batch, params, model_apply_fn: Callable[..., Any],
   aux = carry[-1]
   kl_path = aux['kl_path']
   kl_q0 = aux['kl_q0']
-  logging.info('aux: %s', jax.tree_map(jnp.shape, aux))  # pytype: disable=module-attr
+  logging.info('aux: %s', jax.tree_map(jnp.shape, aux))  # pyrefly: ignore[missing-attribute]
   preds = jnp.moveaxis(preds, source=0, destination=1)
   logging.info('preds.shape: %s', preds.shape)
 
@@ -345,7 +345,7 @@ def compute_mse_loss(batch, params, model_apply_fn: Callable[..., Any],
       'z1_stds': jnp.abs(aux['z1_stds']).mean(axis=0),
       'tke_err': tke_error.mean(axis=0),
   }
-  logging.info('aux: %s', jax.tree_map(jnp.shape, aux))  # pytype: disable=module-attr
+  logging.info('aux: %s', jax.tree_map(jnp.shape, aux))  # pyrefly: ignore[missing-attribute]
   return loss, aux
 
 
@@ -370,7 +370,7 @@ def compute_metrics(loss, aux, train: bool):
     metrics['mse@64'] = aux['mse'][64 - 1]
     metrics['mse@128'] = aux['mse'][128 - 1]
 
-  logging.info('metrics: %s', jax.tree_map(jnp.shape, metrics))  # pytype: disable=module-attr
+  logging.info('metrics: %s', jax.tree_map(jnp.shape, metrics))  # pyrefly: ignore[missing-attribute]
   metrics = lax.pmean(metrics, axis_name='batch')
   return metrics
 

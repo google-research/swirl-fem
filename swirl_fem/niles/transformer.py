@@ -268,7 +268,7 @@ class EncoderBlock(nn.Module):
           dtype=self.dtype,
           precision=self.precision,
           use_bias=self.use_bias)(x_norm)  # Reference uses x_norm here!
-    return y + x_res  # pytype: disable=bad-return-type  # jax-ndarray
+    return y + x_res
 
 
 class DecoderBlock(nn.Module):
@@ -793,11 +793,11 @@ class LatentSDE(nn.Module):
 
     num_layers = self.model_config.num_layers
     # Make these transformers?
-    self.encoder_mlp = MLP(  # pytype: disable=wrong-arg-types
+    self.encoder_mlp = MLP(
         (self.model_config.hidden_size,) * num_layers + (self.post_input_size,),
         activation_fn=nn.gelu,
         final_activation_fn=nn.gelu, name='sde_encoder_mlp')
-    self.decoder_mlp = MLP(  # pytype: disable=wrong-arg-types
+    self.decoder_mlp = MLP(
         (self.model_config.hidden_size,) * num_layers + (self.state_size,),
         activation_fn=nn.gelu,
         final_activation_fn=nn.gelu, name='sde_decoder_mlp')

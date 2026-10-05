@@ -253,7 +253,7 @@ class BarycentricInterpolator:
 
   def interpolate(self, x: jax.Array) -> jax.Array:
     """Interpolate values specified on gridpoints to the evaluation points."""
-    assert x.shape == (self.gridpoints_1d.num_points ** self.ndim,), x.shape  # pytype: disable=attribute-error  # numpy-scalars
+    assert x.shape == (self.gridpoints_1d.num_points ** self.ndim,), x.shape
     if self.gridpoints_1d == self.evalpoints_1d:
       return x
 

@@ -177,8 +177,8 @@ def _fanin_fanout_flat(
     target = SemiTracedScalar.where(is_base_lo, base_hi, idx)
     target = SemiTracedScalar.where(is_base_hi, base_lo, target)
     schedule.append({'target': target.global_,
-                     'is_base_lo': is_base_lo.local,  # pytype: disable=attribute-error
-                     'is_base_hi': is_base_hi.local})  # pytype: disable=attribute-error
+                     'is_base_lo': is_base_lo.local,
+                     'is_base_hi': is_base_hi.local})
     n = SemiTracedScalar.where(is_lo, n_lo, n - n_lo)
     base_lo = SemiTracedScalar.where(is_lo, base_lo, base_hi)
 

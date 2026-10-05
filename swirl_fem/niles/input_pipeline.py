@@ -85,7 +85,7 @@ def _read_and_parse(
       windows.append(arr[i:i + window_size:window_step])
     return np.stack(windows)
 
-  return jax.tree_map(_windowed, snapshots)  # pytype: disable=module-attr
+  return jax.tree_map(_windowed, snapshots)  # pyrefly: ignore[missing-attribute]
 
 
 def create_split(
@@ -142,7 +142,7 @@ def create_split(
   for key, value in snapshots.items():
     split_snapshots[key] = value[split_start:split_start + split_size]
 
-  ds = tf.data.Dataset.from_tensor_slices(split_snapshots)  # pyrefly: ignore[bad-argument-type]
+  ds = tf.data.Dataset.from_tensor_slices(split_snapshots)
   options = tf.data.Options()
   options.experimental_threading.private_threadpool_size = 48
   ds = ds.with_options(options)
